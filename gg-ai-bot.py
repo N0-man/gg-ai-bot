@@ -1,18 +1,35 @@
-import ollama
+from ollama import Client
 import gradio as gr
+import os
+
+ENGLISH_PROMPT = '''
+Assume the role of a teacher for a 9 years old homeschool child named "Hoorain" who is learning English.
+Your task is to correct her grammar mistakes and help her use better vocabulary. 
+Also summarise her mistakes and share corrections. Dont be verbose.
+You are not allowed to answer questions related to science, math, geography, or any general knowledge topics except english. Pretent that you do not know these subjects.
+Please ensure to add more follow up questions to continue the conversation in English.
+Appreciate "Hoorain" if her sentences are gramatically correct.
+'''
+API_URL = os.environ.get('OLAMA_HOST_URL')
+ollama = Client(host=API_URL)
 
 def generate_response(message, history):
     formatted_history = []
+    ASSISTANT = "assistant"
+    USER = "user"
+
+    def add_context(role, content):
+        formatted_history.append({"role": role, "content":content})    
 
     if history is None or len(history) == 0:
-        formatted_history.append({"role": "user", "content": ENGLISH_USER_PROMPT })
-        formatted_history.append({"role": "assistant", "content":ENGLISH_SYS_PROMPT})
+        add_context(ASSISTANT, ENGLISH_PROMPT)
+    elif len(history[-1]) == 2:
+        user, assistant = history[-1]
+        add_context(ASSISTANT, f"{ENGLISH_PROMPT} \n users message: {user} \n assistance response: {assistant}")
+    else:
+        add_context(ASSISTANT, f"{ENGLISH_PROMPT} \n\n {history[-1]}")
 
-    for user, assistant in history:
-        formatted_history.append({"role": "user", "content": user })
-        formatted_history.append({"role": "assistant", "content":assistant})
-
-    formatted_history.append({"role": "user", "content": message})
+    add_context(USER, message)
   
     response = ollama.chat(
         model='llama3.1',
@@ -43,32 +60,23 @@ def chatbot(context):
     )
 
 
-ENGLISH = "English Vinglish"
-MATH = "Math Beast"
-RESEARCH = "Research Lah"
-
-ENGLISH_SYS_PROMPT = '''
-Assume the role of a teacher for a 9 years old homeschool child named "abc" who is learning English.
-Your task is to correct her grammar mistakes during conversation. Please summarise her mistakes and share corrections.
-You do not know science, math, geography, or general knowledge, so do not answer these questions.
-Please ensure to add more follow up questions to continue the conversation.
-appreciate "abc" if her sentences are gramatically correct
-'''
-
-ENGLISH_USER_PROMPT = '''
-A 9 years old homeschool child learning english
-'''
-
-
-with gr.Blocks() as ggbot:
-    with gr.Row(equal_height=False):
-        with gr.Column(scale=2, ): 
-            _ = gr.Image("gg-tiny.png", scale=1)
-        with gr.Column(scale=4, ): 
-            with gr.Tab(ENGLISH):
-                _ = chatbot(ENGLISH)
-            with gr.Tab(MATH):
-                _ = chatbot(MATH)
 
 if __name__ == "__main__":
-    ggbot.launch()
+    ENGLISH = "English Vinglish"
+    MATH = "Math Beast"
+    RESEARCH = "Research Lah"
+
+    with gr.Blocks() as ggbot:
+        with gr.Row(equal_height=False):
+            with gr.Column(scale=2, ): 
+                _ = gr.Image("gg-tiny.png", scale=1)
+            with gr.Column(scale=4, ): 
+                with gr.Tab(ENGLISH):
+                    _ = chatbot(ENGLISH)
+                with gr.Tab(MATH):
+                    _ = chatbot(MATH)
+    try:
+        ggbot.launch()
+    except Exception as e:
+        print("An error occurred:", str(e))
+
