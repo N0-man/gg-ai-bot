@@ -1,4 +1,5 @@
-from ollama import Client
+# from ollama import Client
+from ollama._client import Client
 import gradio as gr
 import os
 
@@ -10,8 +11,8 @@ You are not allowed to answer questions related to science, math, geography, or 
 Please ensure to add more follow up questions to continue the conversation in English.
 Appreciate "Hoorain" if her sentences are gramatically correct.
 '''
-API_URL = os.environ.get('OLAMA_HOST_URL')
-ollama = Client(host=API_URL)
+OLLAMA_HOST = os.environ.get('OLLAMA_HOST')
+ollama_client = Client(host=OLLAMA_HOST)
 
 def generate_response(message, history):
     formatted_history = []
@@ -31,17 +32,21 @@ def generate_response(message, history):
 
     add_context(USER, message)
   
-    response = ollama.chat(
-        model='llama3.1',
-        messages=formatted_history,
-        stream=True,
-    )
+    
+    try: 
+        response = ollama_client.chat(
+            model='llama3.1',
+            messages=formatted_history,
+            stream=True,
+        )
 
-    partial_message = ""
-    for chunk in response:
-        if chunk['message']['content'] is not None:
-              partial_message = partial_message + chunk['message']['content']
-              yield partial_message
+        partial_message = ""
+        for chunk in response:
+            if chunk['message']['content'] is not None:
+                    partial_message = partial_message + chunk['message']['content']
+                    yield partial_message
+    except Exception as e:
+        raise gr.Error("Guddu guide might be sleeping 💤🛌 Ask daddy to shake-it-up 🐣!", duration=10)
 
 def chatbot(context):
     return gr.ChatInterface(
@@ -59,8 +64,6 @@ def chatbot(context):
         clear_btn="Clear"
     )
 
-
-
 if __name__ == "__main__":
     ENGLISH = "English Vinglish"
     MATH = "Math Beast"
@@ -76,7 +79,7 @@ if __name__ == "__main__":
                 with gr.Tab(MATH):
                     _ = chatbot(MATH)
     try:
-        ggbot.launch()
+        ggbot.launch(show_error=True)
     except Exception as e:
         print("An error occurred:", str(e))
 
