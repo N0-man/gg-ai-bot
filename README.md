@@ -1,3 +1,3 @@
 # GitHub Pages
 
-https://n0-man.github.io/GG-AI-BOT/
+https://n0-man.github.io/gg-ai-bot/
