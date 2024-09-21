@@ -90,21 +90,24 @@ if __name__ == "__main__":
     )
 
     with gr.Blocks(theme=theme, fill_height=True) as ggbot:
-        with gr.Row(equal_height=False):
-            with gr.Column(scale=4, ): 
-                with gr.Tab(ENGLISH):
-                    _ = chatbot()
-                with gr.Tab(MATH):
-                    _ = chatbot()
-            with gr.Column(scale=1, ): 
-                _ = gr.Image(
-                    "gg-tiny.png", 
-                    scale=1, 
-                    show_label=False, 
-                    show_download_button=False, 
-                    container=False, 
-                    show_fullscreen_button=False
-                )
+        gr.Markdown(
+        """
+        # Your personal guide
+          There is no end to education. It is not that your ead a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
+        """)
+        with gr.Tab(ENGLISH):
+            _ = chatbot()
+        with gr.Tab(MATH):
+            _ = chatbot()
+        gr.Image(
+                "gg-tiny.png", 
+                scale=1, 
+                show_label=False, 
+                show_download_button=False, 
+                container=False, 
+                show_fullscreen_button=False
+            )
+
     try:
         ggbot.launch(show_error=True)
     except Exception as e:
