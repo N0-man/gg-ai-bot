@@ -1,3 +1,2 @@
-gradio
-ollama
-python
+ollama == 0.3.3
+gradio == 4.44.0
