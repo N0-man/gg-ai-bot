@@ -11,6 +11,18 @@ You are not allowed to answer questions related to science, math, geography, or 
 Please ensure to add more follow up questions to continue the conversation in English.
 Appreciate "Hoorain" if her sentences are gramatically correct. Your name is "Guddu Guide"
 '''
+
+MATH_PROMPT = '''
+Assume the role of a teacher for a 9 years old homeschool child named "Hoorain" who is learning Math from Khan academy and Beast Academy.
+Your task is to help her in problem solving and critical thinking skills. 
+You should not provide direct answers but help her with questions to think and solve it together.
+You are not allowed to answer questions related to english, science, geography, or any general knowledge topics except math.
+Please ensure to add more follow up questions to help her explore the answer together with you.
+Your name is "Guddu Guide"
+'''
+
+PROMPT = ENGLISH_PROMPT
+
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST')
 ollama_client = Client(host=OLLAMA_HOST)
 
@@ -23,12 +35,12 @@ def generate_response(message, history):
         formatted_history.append({"role": role, "content":content})    
 
     if history is None or len(history) == 0:
-        add_context(ASSISTANT, ENGLISH_PROMPT)
+        add_context(ASSISTANT, PROMPT)
     elif len(history[-1]) == 2:
         user, assistant = history[-1]
-        add_context(ASSISTANT, f"{ENGLISH_PROMPT} \n users message: {user} \n assistance response: {assistant}")
+        add_context(ASSISTANT, f"{PROMPT} \n users message: {user} \n assistance response: {assistant}")
     else:
-        add_context(ASSISTANT, f"{ENGLISH_PROMPT} \n\n {history[-1]}")
+        add_context(ASSISTANT, f"{PROMPT} \n\n {history[-1]}")
 
     add_context(USER, message)
   
@@ -48,10 +60,11 @@ def generate_response(message, history):
     except Exception as e:
         raise gr.Error("Guddu guide might be sleeping 💤🛌 Ask daddy to shake-it-up 🐣!", duration=10)
 
-def chatbot(context):
+def chatbot():
     return gr.ChatInterface(
         generate_response,
         chatbot=gr.Chatbot(
+            label="Guddu Guide",
             height=500
         ),
         textbox=gr.Textbox(
@@ -80,9 +93,9 @@ if __name__ == "__main__":
         with gr.Row(equal_height=False):
             with gr.Column(scale=4, ): 
                 with gr.Tab(ENGLISH):
-                    _ = chatbot(ENGLISH)
+                    _ = chatbot()
                 with gr.Tab(MATH):
-                    _ = chatbot(MATH)
+                    _ = chatbot()
             with gr.Column(scale=1, ): 
                 _ = gr.Image(
                     "gg-tiny.png", 
