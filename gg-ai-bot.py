@@ -60,8 +60,8 @@ def chatbot(context):
             scale=7
         ),
         retry_btn=None,
-        undo_btn="Delete Previous",
-        clear_btn="Clear"
+        undo_btn=None,
+        clear_btn=None
     )
 
 if __name__ == "__main__":
@@ -69,15 +69,29 @@ if __name__ == "__main__":
     MATH = "Math Beast"
     RESEARCH = "Research Lah"
 
-    with gr.Blocks() as ggbot:
+    theme = gr.themes.Soft(
+        primary_hue="pink",
+        secondary_hue="rose",
+        neutral_hue="sky",
+        text_size="lg",
+    )
+
+    with gr.Blocks(theme=theme, fill_height=True) as ggbot:
         with gr.Row(equal_height=False):
-            with gr.Column(scale=2, ): 
-                _ = gr.Image("gg-tiny.png", scale=1)
             with gr.Column(scale=4, ): 
                 with gr.Tab(ENGLISH):
                     _ = chatbot(ENGLISH)
                 with gr.Tab(MATH):
                     _ = chatbot(MATH)
+            with gr.Column(scale=1, ): 
+                _ = gr.Image(
+                    "gg-tiny.png", 
+                    scale=1, 
+                    show_label=False, 
+                    show_download_button=False, 
+                    container=False, 
+                    show_fullscreen_button=False
+                )
     try:
         ggbot.launch(show_error=True)
     except Exception as e:
