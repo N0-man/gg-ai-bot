@@ -1,0 +1,15 @@
+{
+    "version": "0.1",
+    "configurations": [
+      {
+        "name": "gg-ai-bot",
+        "type": "python",
+        "request": "launch",
+        "python": "/Users/n0man/Library/Caches/pypoetry/virtualenvs/gg-ai-bot-ComDNB1S-py3.12/bin/python",
+        "module": "gg-ai-bot",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "console": "integratedTerminal"
+      }
+    ]
+  }

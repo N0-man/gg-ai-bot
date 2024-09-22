@@ -163,4 +163,3 @@ cython_debug/
 _build
 .DS_Store
 .env
-.vscode

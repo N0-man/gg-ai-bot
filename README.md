@@ -6,9 +6,13 @@ python_version: 3.10.14
 sdk_version: 4.44.0
 ---
 
-# Lamma3.1 Chatbot
+# Ollama Chatbot
 
 A basic chatbot designed to help guide my homeschool daughter in English and Math
+
+## Architecture
+
+![Architecture](/architecture.jpg)
 
 ## Hugging Face setup
 
@@ -62,4 +66,12 @@ poetry install
 
 ```
 poetry run python gg-ai-bot.py
+```
+
+#### Debug
+
+Fetch Debug Configurations
+
+```
+poetry debug info
 ```
