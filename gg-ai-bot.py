@@ -9,24 +9,26 @@ MATH = "Math Beast"
 RESEARCH = "Research Lah"
 CONTEXT = ""
 
-def english_prompt():
-    return f'''
-    Assume the role of a teacher for a 9 years old homeschool child named {LEARNERS_NAME} who is learning English.
-    Your task is to correct her grammar mistakes and help her use better english vocabulary. 
-    Also summarise her mistakes and share corrections. Dont be verbose.
-    You are not allowed to answer questions related to science, math, geography, or any general knowledge topics except english.
-    Please ensure to add more follow up questions to continue the conversation in English.
-    Appreciate {LEARNERS_NAME} if her sentences are gramatically correct. Your name is "Guddu Guide"
-    '''
-
-MATH_PROMPT = '''
-Assume the role of a teacher for a 9 years old homeschool child named "Hoorain" who is learning Math from Khan academy and Beast Academy.
-Your task is to help her in problem solving and critical thinking skills. 
-You should not provide direct answers but help her with questions to think and solve it together.
-You are not allowed to answer questions related to english, science, geography, or any general knowledge topics except math.
-Please ensure to add more follow up questions to help her explore the answer together with you.
-Your name is "Guddu Guide"
-'''
+def prompt():
+    if CONTEXT == MATH:
+        return f'''
+        Assume the role of a teacher for a 9 years old homeschool child named {LEARNERS_NAME} who is learning Math from Khan academy and Beast Academy.
+        Your task is to help her in problem solving and critical thinking skills. 
+        You should not provide direct answers but help her with questions to think about the answers.
+        You are allowed to provide if her answer is correct or wrong.
+        You are not allowed to answer questions related to english, science, geography, or any general knowledge topics except math.
+        Please ensure to add more follow up questions to help her explore the answer.
+        Your name is "Guddu Guide".
+        '''
+    else: 
+        return f'''
+        Assume the role of a teacher for a 9 years old homeschool child named {LEARNERS_NAME} who is learning English.
+        Your task is to correct her grammar mistakes and help her use better english vocabulary. 
+        Also summarise her mistakes and share corrections. Dont be verbose.
+        You are not allowed to answer questions related to science, math, geography, or any general knowledge topics except english.
+        Please ensure to add more follow up questions to continue the conversation in English.
+        Appreciate {LEARNERS_NAME} if her sentences are gramatically correct. Your name is "Guddu Guide"
+        '''
 
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST')
 ollama_client = Client(host=OLLAMA_HOST)
@@ -40,12 +42,12 @@ def generate_response(message, history):
         formatted_history.append({"role": role, "content":content})    
 
     if history is None or len(history) == 0:
-        add_context(ASSISTANT, english_prompt())
+        add_context(ASSISTANT, prompt())
     elif len(history[-1]) == 2:
         user, assistant = history[-1]
-        add_context(ASSISTANT, f"{english_prompt()} \n users message: {user} \n assistance response: {assistant}")
+        add_context(ASSISTANT, f"{prompt()} \n users message: {user} \n assistance response: {assistant}")
     else:
-        add_context(ASSISTANT, f"{english_prompt()} \n\n {history[-1]}")
+        add_context(ASSISTANT, f"{prompt()} \n\n {history[-1]}")
 
     add_context(USER, message)
   
@@ -96,6 +98,10 @@ if __name__ == "__main__":
             LEARNERS_NAME = "Hoorain"
         else:
             LEARNERS_NAME = name
+    
+    def change_tab(name):
+        global CONTEXT
+        CONTEXT = name
 
     with gr.Blocks(theme=theme, fill_height=True) as ggbot:
         gr.Markdown(
@@ -106,20 +112,23 @@ if __name__ == "__main__":
         name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
         name_textbox.change(change_name, name_textbox)
 
-        with gr.Tab(ENGLISH):
+        with gr.Tab(ENGLISH) as english:
+            CONTEXT = ENGLISH
             _ = chatbot()
-        with gr.Tab(MATH):
+        with gr.Tab(MATH) as math:
+            CONTEXT = MATH
             _ = chatbot()
-        with gr.Tab(RESEARCH):
+        with gr.Tab(RESEARCH) as research:
+            CONTEXT = RESEARCH
             _ = chatbot()
-        with gr.Tab("Why?"):
+        with gr.Tab("Why?") as about:
             gr.Markdown(
             """
             # English
 
             # Math
 
-            #Research
+            # Research
             """)
         gr.Image(
                 "gg-tiny.png", 
@@ -129,6 +138,11 @@ if __name__ == "__main__":
                 container=False, 
                 show_fullscreen_button=False
             )
+        
+        english.select(lambda :change_tab(ENGLISH), None)
+        math.select(lambda :change_tab(MATH), None)
+        research.select(lambda :change_tab(RESEARCH), None)
+        about.select(lambda :change_tab(ENGLISH), None)
 
     try:
         ggbot.launch(show_error=True)
