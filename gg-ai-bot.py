@@ -3,14 +3,17 @@ from ollama._client import Client
 import gradio as gr
 import os
 
-ENGLISH_PROMPT = '''
-Assume the role of a teacher for a 9 years old homeschool child named "Hoorain" who is learning English.
-Your task is to correct her grammar mistakes and help her use better english vocabulary. 
-Also summarise her mistakes and share corrections. Dont be verbose.
-You are not allowed to answer questions related to science, math, geography, or any general knowledge topics except english.
-Please ensure to add more follow up questions to continue the conversation in English.
-Appreciate "Hoorain" if her sentences are gramatically correct. Your name is "Guddu Guide"
-'''
+NAME = "HOORAIN"
+
+def english_prompt():
+    return f'''
+    Assume the role of a teacher for a 9 years old homeschool child named {NAME} who is learning English.
+    Your task is to correct her grammar mistakes and help her use better english vocabulary. 
+    Also summarise her mistakes and share corrections. Dont be verbose.
+    You are not allowed to answer questions related to science, math, geography, or any general knowledge topics except english.
+    Please ensure to add more follow up questions to continue the conversation in English.
+    Appreciate {NAME} if her sentences are gramatically correct. Your name is "Guddu Guide"
+    '''
 
 MATH_PROMPT = '''
 Assume the role of a teacher for a 9 years old homeschool child named "Hoorain" who is learning Math from Khan academy and Beast Academy.
@@ -21,7 +24,7 @@ Please ensure to add more follow up questions to help her explore the answer tog
 Your name is "Guddu Guide"
 '''
 
-PROMPT = ENGLISH_PROMPT
+PROMPT = english_prompt()
 
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST')
 ollama_client = Client(host=OLLAMA_HOST)
@@ -35,12 +38,12 @@ def generate_response(message, history):
         formatted_history.append({"role": role, "content":content})    
 
     if history is None or len(history) == 0:
-        add_context(ASSISTANT, PROMPT)
+        add_context(ASSISTANT, english_prompt())
     elif len(history[-1]) == 2:
         user, assistant = history[-1]
-        add_context(ASSISTANT, f"{PROMPT} \n users message: {user} \n assistance response: {assistant}")
+        add_context(ASSISTANT, f"{english_prompt()} \n users message: {user} \n assistance response: {assistant}")
     else:
-        add_context(ASSISTANT, f"{PROMPT} \n\n {history[-1]}")
+        add_context(ASSISTANT, f"{english_prompt()} \n\n {history[-1]}")
 
     add_context(USER, message)
   
@@ -89,12 +92,19 @@ if __name__ == "__main__":
         text_size="lg",
     )
 
+    def change_name(name):
+        global NAME
+        NAME = name
+
     with gr.Blocks(theme=theme, fill_height=True) as ggbot:
         gr.Markdown(
         """
         # Your personal guide
           There is no end to education. It is not that your ead a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
         """)
+        name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
+        name_textbox.change(change_name, name_textbox)
+
         with gr.Tab(ENGLISH):
             _ = chatbot()
         with gr.Tab(MATH):
