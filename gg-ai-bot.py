@@ -99,6 +99,8 @@ if __name__ == "__main__":
             _ = chatbot()
         with gr.Tab(MATH):
             _ = chatbot()
+        with gr.Tab(RESEARCH):
+            _ = chatbot()
         gr.Image(
                 "gg-tiny.png", 
                 scale=1, 
