@@ -3,16 +3,20 @@ from ollama._client import Client
 import gradio as gr
 import os
 
-NAME = "HOORAIN"
+LEARNERS_NAME = "HOORAIN"
+ENGLISH = "English Vinglish"
+MATH = "Math Beast"
+RESEARCH = "Research Lah"
+CONTEXT = ""
 
 def english_prompt():
     return f'''
-    Assume the role of a teacher for a 9 years old homeschool child named {NAME} who is learning English.
+    Assume the role of a teacher for a 9 years old homeschool child named {LEARNERS_NAME} who is learning English.
     Your task is to correct her grammar mistakes and help her use better english vocabulary. 
     Also summarise her mistakes and share corrections. Dont be verbose.
     You are not allowed to answer questions related to science, math, geography, or any general knowledge topics except english.
     Please ensure to add more follow up questions to continue the conversation in English.
-    Appreciate {NAME} if her sentences are gramatically correct. Your name is "Guddu Guide"
+    Appreciate {LEARNERS_NAME} if her sentences are gramatically correct. Your name is "Guddu Guide"
     '''
 
 MATH_PROMPT = '''
@@ -23,8 +27,6 @@ You are not allowed to answer questions related to english, science, geography, 
 Please ensure to add more follow up questions to help her explore the answer together with you.
 Your name is "Guddu Guide"
 '''
-
-PROMPT = english_prompt()
 
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST')
 ollama_client = Client(host=OLLAMA_HOST)
@@ -81,10 +83,6 @@ def chatbot():
     )
 
 if __name__ == "__main__":
-    ENGLISH = "English Vinglish"
-    MATH = "Math Beast"
-    RESEARCH = "Research Lah"
-
     theme = gr.themes.Soft(
         primary_hue="pink",
         secondary_hue="rose",
@@ -93,8 +91,11 @@ if __name__ == "__main__":
     )
 
     def change_name(name):
-        global NAME
-        NAME = name
+        global LEARNERS_NAME
+        if name is None or name.strip() == "":
+            LEARNERS_NAME = "Hoorain"
+        else:
+            LEARNERS_NAME = name
 
     with gr.Blocks(theme=theme, fill_height=True) as ggbot:
         gr.Markdown(
@@ -111,6 +112,15 @@ if __name__ == "__main__":
             _ = chatbot()
         with gr.Tab(RESEARCH):
             _ = chatbot()
+        with gr.Tab("Why?"):
+            gr.Markdown(
+            """
+            # English
+
+            # Math
+
+            #Research
+            """)
         gr.Image(
                 "gg-tiny.png", 
                 scale=1, 
