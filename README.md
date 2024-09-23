@@ -75,3 +75,11 @@ Fetch Debug Configurations
 ```
 poetry debug info
 ```
+
+#### Ngrok
+
+if you are running an ngrok tunnel with static address, make sure to add the host header to avoid CORS issues
+
+```
+ngrok http --domain=some-static-name.app 11434 --host-header="localhost:11434"
+```
