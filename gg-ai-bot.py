@@ -4,9 +4,9 @@ import gradio as gr
 import os
 
 LEARNERS_NAME = "HOORAIN"
-ENGLISH = "English Vinglish"
-MATH = "Math Beast"
-RESEARCH = "Research Lah"
+ENGLISH = "English"
+MATH = "Math"
+RESEARCH = "Research"
 CONTEXT = ""
 
 def prompt():
