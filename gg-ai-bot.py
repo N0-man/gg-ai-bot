@@ -113,13 +113,10 @@ if __name__ == "__main__":
         name_textbox.change(change_name, name_textbox)
 
         with gr.Tab(ENGLISH) as english:
-            CONTEXT = ENGLISH
             _ = chatbot()
         with gr.Tab(MATH) as math:
-            CONTEXT = MATH
             _ = chatbot()
         with gr.Tab(RESEARCH) as research:
-            CONTEXT = RESEARCH
             _ = chatbot()
         with gr.Tab("Why?") as about:
             gr.Markdown(
@@ -143,7 +140,7 @@ if __name__ == "__main__":
         math.select(lambda :change_tab(MATH), None)
         research.select(lambda :change_tab(RESEARCH), None)
         about.select(lambda :change_tab(ENGLISH), None)
-
+        CONTEXT = ENGLISH
     try:
         ggbot.launch(show_error=True)
     except Exception as e:
