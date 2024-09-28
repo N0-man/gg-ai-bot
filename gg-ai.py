@@ -1,7 +1,18 @@
 from ollama._client import Client
 import os
 import gradio as gr
-import datetime
+from dataclasses import dataclass
+
+@dataclass
+class UserState:
+    learners_name: str
+    guide_context: int
+    theme: dict
+
+ENGLISH = "English"
+MATH = "Math"
+RESEARCH = "Research"
+DEFAULT_LEARNER = "Hoorain"
 
 class GudduGuide:
     def __init__(self):
@@ -9,11 +20,13 @@ class GudduGuide:
         self.english = "English"
         self.math = "Math"
         self.research = "Research"
-        self.context = self.english
+        self.__context = self.english
         self.ollama_client = Client(host=os.environ.get('OLLAMA_HOST'))
 
     def prompt(self):
-        if self.context == self.math:
+        current_state: UserState = gr.State()
+
+        if self.__context == self.math:
             return f'''
             Assume the role of a teacher for a 9 years old homeschool child named {self.learners_name} who is learning Math from Khan academy and Beast Academy.
             Your task is to help her in problem solving and critical thinking skills. 
@@ -33,7 +46,7 @@ class GudduGuide:
             Appreciate {self.learners_name} if her sentences are gramatically correct. Your name is "Guddu Guide"
             '''
 
-    def generate_response(self, message, history):
+    def generate_response(self, message, history, user_state):
         formatted_history = []
         ASSISTANT = "assistant"
         USER = "user"
@@ -65,9 +78,10 @@ class GudduGuide:
         except Exception as e:
             raise gr.Error("Guddu guide might be sleeping 💤🛌 Ask daddy to shake-it-up 🐣!", duration=10)
 
-    def chatbot(self):
+    def chatbot(self, user_state):
         return gr.ChatInterface(
             self.generate_response,
+            additional_inputs=[user_state],
             chatbot=gr.Chatbot(
                 label="Guddu Guide",
                 height=500
@@ -88,9 +102,16 @@ class GudduGuide:
         else:
             self.learners_name = name
 
-    def change_context(self, context):
-        self.context = context
+    def change_context(self, context, user_state):
+        self.__context = context
+        user_state = gr.State(UserState(user_state.value.learners_name, context, user_state.value.theme))
         
+
+def predict(learners_name, context):
+    return {
+        "learners_name": learners_name,
+        "context": context,
+    }
 
 def main():
     theme = gr.themes.Soft(
@@ -102,20 +123,21 @@ def main():
     ggai = GudduGuide()
 
     with gr.Blocks(theme=theme, fill_height=True) as ggbot:
+        user_state = gr.State(UserState(learners_name=DEFAULT_LEARNER, guide_context=ENGLISH, theme=theme))
+
         gr.Markdown(
         """
         # Your personal guide
           There is no end to education. It is not that your ead a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
         """)
         name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
-        name_textbox.change(ggai.change_learners_name, name_textbox)
 
         with gr.Tab(ggai.english) as english:
-            _ = ggai.chatbot()
+            _ = ggai.chatbot(user_state)
         with gr.Tab(ggai.math) as math:
-            _ = ggai.chatbot()
+            _ = ggai.chatbot(user_state)
         with gr.Tab(ggai.research) as research:
-            _ = ggai.chatbot()
+            _ = ggai.chatbot(user_state)
         with gr.Tab("Why?") as about:
             gr.Markdown(
             """
@@ -133,14 +155,12 @@ def main():
                 container=False, 
                 show_fullscreen_button=False
             )
-        # def get_time():
-        #     return datetime.datetime.now().time()
-        # gr.load(get_time, inputs=None, outputs=None)
         
-        english.select(lambda :ggai.change_context(ggai.english), None)
-        math.select(lambda :ggai.change_context(ggai.math), None)
-        research.select(lambda :ggai.change_context(ggai.research), None)
-        about.select(lambda :ggai.change_context(ggai.english), None)
+        name_textbox.change(ggai.change_learners_name, name_textbox)
+        english.select(lambda :ggai.change_context(ggai.english, user_state), None)
+        math.select(lambda :ggai.change_context(ggai.math, user_state), None)
+        research.select(lambda :ggai.change_context(ggai.research, user_state), None)
+        about.select(lambda :ggai.change_context(ggai.english, user_state), None)
     try:
         ggbot.launch(show_error=True)
     except Exception as e:
