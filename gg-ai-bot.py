@@ -41,16 +41,24 @@ def generate_response(message, history):
     def add_context(role, content):
         formatted_history.append({"role": role, "content":content})    
 
-    if history is None or len(history) == 0:
-        add_context(ASSISTANT, prompt())
-    elif len(history[-1]) == 2:
-        user, assistant = history[-1]
-        add_context(ASSISTANT, f"{prompt()} \n users message: {user} \n assistance response: {assistant}")
-    else:
-        add_context(ASSISTANT, f"{prompt()} \n\n {history[-1]}")
+    add_context(ASSISTANT, prompt())
+    # Consider only last 10 message context
+    if history and len(history) > 0:
+        for user, assistant in history[-10:]:
+            add_context(USER, user)
+            add_context(ASSISTANT, assistant)
+        # formatted_history.append({"role": "user", "content": user })
+        # formatted_history.append({"role": "assistant", "content":assistant})
+
+    # if history is None or len(history) == 0:
+    #     add_context(ASSISTANT, prompt())
+    # elif len(history[-1]) == 2:
+    #     user, assistant = history[-1]
+    #     add_context(ASSISTANT, f"{prompt()} \n users message: {user} \n assistance response: {assistant}")
+    # else:
+    #     add_context(ASSISTANT, f"{prompt()} \n\n {history[-1]}")
 
     add_context(USER, message)
-  
     
     try: 
         response = ollama_client.chat(
