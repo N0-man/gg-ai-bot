@@ -3,11 +3,6 @@ import os
 import gradio as gr
 from dataclasses import dataclass
 
-# @dataclass
-# class UserState:
-#     learners_name: str
-#     guide_context: int
-#     theme: dict
 
 ENGLISH = "English"
 MATH = "Math"
@@ -45,7 +40,7 @@ class GudduGuide:
             Appreciate {name} if her sentences are gramatically correct. Your name is "Guddu Guide"
             '''
 
-    def generate_response(self, message, history, name_textbox, context):
+    def generate_response(self, message, history, name, context):
         formatted_history = []
         ASSISTANT = "assistant"
         USER = "user"
@@ -54,12 +49,12 @@ class GudduGuide:
             formatted_history.append({"role": role, "content":content})
 
         def learners_name():
-            if name_textbox is None or name_textbox.strip() == "":
+            if name is None or name.strip() == "":
                 return "Hoorain"
             else:
-                return name_textbox
+                return name
 
-        add_context(ASSISTANT, self.prompt(learners_name(), context))
+        add_context(ASSISTANT, self.prompt(name, context))
 
         if history and len(history) > 0:
             for user, assistant in history[-10:]:
@@ -83,10 +78,10 @@ class GudduGuide:
         except Exception as e:
             raise gr.Error("Guddu guide might be sleeping 💤🛌 Ask daddy to shake-it-up 🐣!", duration=10)
 
-    def chatbot(self, name_textbox, context):
+    def chatbot(self, name, context):
         return gr.ChatInterface(
             self.generate_response,
-            additional_inputs=[name_textbox, context],
+            additional_inputs=[name, context],
             chatbot=gr.Chatbot(
                 label="Guddu Guide",
                 height=500
@@ -107,28 +102,9 @@ class GudduGuide:
     #     else:
     #         self.learners_name = name
 
-    def change_context(self, context, context_textbox):
-        self.__context = context
-        context_textbox.value = context
-
-def predict(learners_name, context):
-    return {
-        "learners_name": learners_name,
-        "context": context,
-    }
-
-get_local_storage = """
-    function() {
-      globalThis.setStorage = (key, value)=>{
-        localStorage.setItem(key, JSON.stringify(value))
-      }
-       globalThis.getStorage = (key, value)=>{
-        return JSON.parse(localStorage.getItem(key))
-      }
-       const context =  getStorage('context')
-       return [context];
-      }
-    """
+    # def change_context(self, context, context_textbox):
+    #     self.__context = context
+    #     context_textbox.value = context
 
 def main():
     theme = gr.themes.Soft(
@@ -145,22 +121,19 @@ def main():
         # Your personal guide
           There is no end to education. It is not that your ead a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
         """)
-        name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
-        context_label = gr.Label(visible=True)
-
-        def learners_name():
-            if name_textbox.value is None or name_textbox.value.strip() == "":
-                return "Hoorain"
-            else:
-                return name_textbox.value
+        with gr.Row():
+            with gr.Column():
+                name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
+            with gr.Column():
+                context = gr.Dropdown(["English", "Math", "Research"], info="What can I help you with?", show_label=False)
 
         with gr.Tabs(visible=True, selected=ggai.english): 
             with gr.Tab(ggai.english, id=ggai.english) as english:
-                _ = ggai.chatbot(learners_name(), ggai.english)
+                _ = ggai.chatbot(name_textbox, context)
             with gr.Tab(ggai.math, id=ggai.math) as math:
-                _ = ggai.chatbot(learners_name(), ggai.english)
+                _ = ggai.chatbot(name_textbox, context)
             with gr.Tab(ggai.research, id=ggai.research) as research:
-                _ = ggai.chatbot(learners_name(), ggai.english)
+                _ = ggai.chatbot(name_textbox, context)
             with gr.Tab("Why?", id="about") as about:
                 gr.Markdown(
                 """
@@ -179,10 +152,10 @@ def main():
                 show_fullscreen_button=False
             )
         # name_textbox.change(ggai.change_learners_name, name_textbox)
-        english.select(lambda :ggai.change_context(ggai.english, context_label), None)
-        math.select(lambda :ggai.change_context(ggai.math, context_label), None)
-        research.select(lambda :ggai.change_context(ggai.research, context_label), None)
-        about.select(lambda :ggai.change_context(ggai.english, context_label), None)
+        # english.select(lambda :ggai.change_context(ggai.english, context_label), None)
+        # math.select(lambda :ggai.change_context(ggai.math, context_label), None)
+        # research.select(lambda :ggai.change_context(ggai.research, context_label), None)
+        # about.select(lambda :ggai.change_context(ggai.english, context_label), None)
     try:
         ggbot.launch(show_error=True)
     except Exception as e:
