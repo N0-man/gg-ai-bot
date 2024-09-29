@@ -6,7 +6,7 @@
         "type": "python",
         "request": "launch",
         "python": "/Users/n0man/Library/Caches/pypoetry/virtualenvs/gg-ai-bot-ComDNB1S-py3.12/bin/python",
-        "module": "app",
+        "module": "gg-ai-bot",
         "args": [],
         "cwd": "${workspaceFolder}",
         "console": "integratedTerminal"
