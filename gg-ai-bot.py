@@ -102,7 +102,7 @@ def main():
         gr.Markdown(
         """
         # Your personal guide
-          There is no end to education. It is not that your ead a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
+          There is no end to education. It is not that you read a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
         """)
         name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
         
