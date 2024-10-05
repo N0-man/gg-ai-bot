@@ -101,17 +101,26 @@ def main():
     with gr.Blocks(theme=theme, fill_height=True) as ggbot:
         gr.Markdown(
         """
-        # Your personal guide
-          There is no end to education. It is not that you read a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
+        # Your Guddu Guide 🐥
         """)
-        name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
+        gr.Markdown(
+        """
+        There is no end to education. It is not that you read a book, pass an exam and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning.
+        """)
+        with gr.Row(equal_height=False):
+            with gr.Column(scale=1, min_width=100):
+                gr.Image(
+                    "gg-tiny.png", 
+                    height=100,
+                    width=100,
+                    show_label=False, 
+                    show_download_button=False, 
+                    container=False, 
+                    show_fullscreen_button=False
+                )
+            with gr.Column(scale=4, min_width=200):
+                name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
         
-        # Next increment for applying themes
-        # with gr.Row():
-        #     with gr.Column():
-        #         theme = gr.Dropdown(["Blue", "Math", "Research"], info="What can I help you with?", show_label=False)
-        #     with gr.Column():
-        #         name_textbox = gr.Textbox(placeholder="add your name if you are not Hoorain", label=f"Hi there...")
 
         with gr.Tabs(visible=True, selected=ENGLISH): 
             with gr.Tab(ENGLISH, id=ENGLISH) as english:
@@ -132,14 +141,7 @@ def main():
 
                 # Research
                 """)
-        gr.Image(
-                "gg-tiny.png", 
-                scale=1, 
-                show_label=False, 
-                show_download_button=False, 
-                container=False, 
-                show_fullscreen_button=False
-            )
+        
     try:
         ggbot.launch(show_error=True)
     except Exception as e:
