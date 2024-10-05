@@ -151,17 +151,17 @@ def main():
             with gr.Tab(RESEARCH, id=RESEARCH) as research:
                 state = gr.State(RESEARCH)
                 _ = ggai.chatbot(name_textbox, state)
-            with gr.Tab("Why?", id="about") as about:
-                gr.Markdown(
-                    """
-                Why this app?
-                # English
+            # with gr.Tab("Why?", id="about") as about:
+            #     gr.Markdown(
+            #         """
+            #     Why this app?
+            #     # English
 
-                # Math
+            #     # Math
 
-                # Research
-                """
-                )
+            #     # Research
+            #     """
+            #     )
 
     try:
         ggbot.launch(show_error=True)
