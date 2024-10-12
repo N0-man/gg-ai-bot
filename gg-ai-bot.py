@@ -94,7 +94,11 @@ class GudduGuide:
         return gr.ChatInterface(
             self.generate_response,
             additional_inputs=[name, state],
-            chatbot=gr.Chatbot(label="Guddu Guide", height=500),
+            chatbot=gr.Chatbot(
+                label="Guddu Guide",
+                height=500,
+                avatar_images=["user.png", "gg_avatar.png"],
+            ),
             textbox=gr.Textbox(
                 placeholder="You can ask me anything", container=False, scale=7
             ),
@@ -151,6 +155,27 @@ def main():
             with gr.Tab(RESEARCH, id=RESEARCH) as research:
                 state = gr.State(RESEARCH)
                 _ = ggai.chatbot(name_textbox, state)
+            # with gr.Tab("Play"):
+            #     chatbot = gr.Chatbot(
+            #         elem_id="chatbot", bubble_full_width=False, type="messages"
+            #     )
+
+            #     chat_input = gr.MultimodalTextbox(
+            #         interactive=True,
+            #         file_count="multiple",
+            #         placeholder="Enter message or upload file...",
+            #         show_label=False,
+            #     )
+
+            #     chat_msg = chat_input.submit(
+            #         add_message, [chatbot, chat_input], [chatbot, chat_input]
+            #     )
+            #     bot_msg = chat_msg.then(bot, chatbot, chatbot, api_name="bot_response")
+            #     bot_msg.then(
+            #         lambda: gr.MultimodalTextbox(interactive=True), None, [chat_input]
+            #     )
+
+            #     chatbot.like(print_like_dislike, None, None, like_user_message=True)
             # with gr.Tab("Why?", id="about") as about:
             #     gr.Markdown(
             #         """
