@@ -5,7 +5,9 @@ import gradio as gr
 ENGLISH = "English"
 MATH = "Math"
 RESEARCH = "Research"
+VISION = "VISION"
 DEFAULT_LEARNER = "Hoorain"
+FART = "Sorry for the fart 💨. Are we missing something?"
 
 
 class GudduGuide:
@@ -46,6 +48,10 @@ class GudduGuide:
             Feel free to engage with the learner by asking them about their research topic.
             Also ensure you dont provide direct answers to math questions.
             """
+        elif context == VISION:
+            return f"""
+            Explain the image in details
+            """
         else:
             return f"""
             You're an experienced English teacher known as "Guddu Guide," specializing in assisting an 11-year-old homeschool learner named {learners_name(name)} with improving their English grammar and vocabulary. Your goal is to create a supportive and encouraging environment where the learner feels comfortable learning and making mistakes.
@@ -54,6 +60,50 @@ class GudduGuide:
             Keep the conversation interactive by asking follow-up questions that encourage the learner to express themselves in English. 
             Ensure your responses are short and non-verbose, and make sure to appreciate {learners_name(name)}'s efforts at the end of each exchange to boost their confidence.
             """
+
+    def generate_vision_response(self, message, history, name):
+        VISION_PROMPT = f"""
+        You're an insightful math teacher named "Guddu Guide" with a strong background in explaining complex math concepts to an 11-year-old homeschool learner named {name} in an easy-to-understand narrative. 
+
+        Your task is to explain an image provided to you in detail. The image would either be from Khan Academy or Beast Academy, and your role is to focus solely on describing the content and context of the image without providing any solutions. 
+
+        Please break down visual information and interpretations to make it easily understandable by {name}. Ensure you do not provide actual answers while providing the strategy of the solution. Here are the details regarding the image that need to be considered in your explanation:  
+        - Question:   
+        - Mathematical concept:   
+        - Strategy to solution:   
+        """
+
+        try:
+            user_images = []
+            user_message = ""
+            for x in message["files"]:
+                user_images.append(x["path"])
+            if message["text"] is not None:
+                user_message = message["text"]
+
+            if not user_images:
+                yield FART
+
+            response = self.ollama_client.generate(
+                model="llava:13b",
+                prompt=VISION_PROMPT + user_message,
+                stream=True,
+                images=user_images,
+            )
+
+            partial_message = ""
+            for chunk in response:
+                if chunk["response"] is not None:
+                    partial_message = partial_message + chunk["response"]
+                    yield partial_message
+                else:
+                    yield FART
+
+        except Exception as e:
+            raise gr.Error(
+                "Guddu guide might be sleeping 💤🛌 Ask daddy to shake-it-up 🐣!",
+                duration=10,
+            )
 
     def generate_response(self, message, history, name, context):
         formatted_history = []
@@ -71,19 +121,18 @@ class GudduGuide:
                 add_context(ASSISTANT, assistant)
 
         add_context(USER, message)
-
         try:
             response = self.ollama_client.chat(
-                model="llama3.1",
-                messages=formatted_history,
-                stream=True,
+                model="llava:13b", messages=formatted_history, stream=True
             )
-
             partial_message = ""
             for chunk in response:
                 if chunk["message"]["content"] is not None:
                     partial_message = partial_message + chunk["message"]["content"]
                     yield partial_message
+                else:
+                    yield FART
+
         except Exception as e:
             raise gr.Error(
                 "Guddu guide might be sleeping 💤🛌 Ask daddy to shake-it-up 🐣!",
@@ -101,6 +150,27 @@ class GudduGuide:
             ),
             textbox=gr.Textbox(
                 placeholder="You can ask me anything", container=False, scale=7
+            ),
+            retry_btn=None,
+            undo_btn=None,
+            clear_btn=None,
+        )
+
+    def multimodal_chatbot(self, name, state):
+        return gr.ChatInterface(
+            self.generate_vision_response,
+            multimodal=True,
+            additional_inputs=[name],
+            chatbot=gr.Chatbot(
+                label="Guddu Guide",
+                height=500,
+                avatar_images=["user.png", "gg_avatar.png"],
+            ),
+            textbox=gr.MultimodalTextbox(
+                interactive=True,
+                file_count="single",
+                placeholder="You can ask me anything",
+                show_label=False,
             ),
             retry_btn=None,
             undo_btn=None,
@@ -155,7 +225,10 @@ def main():
             with gr.Tab(RESEARCH, id=RESEARCH) as research:
                 state = gr.State(RESEARCH)
                 _ = ggai.chatbot(name_textbox, state)
-            # with gr.Tab("Play"):
+            with gr.Tab(VISION):
+                state = gr.State(VISION)
+                _ = ggai.multimodal_chatbot(name_textbox, state)
+            # with gr.Tab(VISION):
             #     chatbot = gr.Chatbot(
             #         elem_id="chatbot", bubble_full_width=False, type="messages"
             #     )
